@@ -1,14 +1,34 @@
 {
-  "devDependencies": {
-    "@types/lodash": "^4.14.202",
-    "@types/node": "^20.11.6"
-  },
-  "dependencies": {
-    "chardet": "^2.0.0",
-    "crc": "^4.3.2",
-    "iconv-lite": "^0.6.3",
-    "lodash": "^4.17.21",
-    "lzfjs": "^1.0.1",
-    "wasmoon-lua5.1": "^1.16.3"
-  }
+    "name": "@jx3box/jx3-luadata",
+    "version": "0.0.1",
+    "description": "A lua data parser for JX3",
+    "authors": [
+        "x3zvawq <x3zvawq@gmail.com>"
+    ],
+    "main": "dist/index.js",
+    "devDependencies": {
+        "@types/lodash": "^4.14.202",
+        "@types/node": "^20.11.6"
+    },
+    "dependencies": {
+        "chardet": "^2.0.0",
+        "crc": "^4.3.2",
+        "iconv-lite": "^0.6.3",
+        "lodash": "^4.17.21",
+        "lzfjs": "^1.0.1"
+    },
+    "license": "MIT",
+    "scripts": {
+        "test": "mocha --parallel --require ./test/boot.js test/*.test.js",
+        "lint": "prettier --write . && eslint . --fix --cache",
+        "lint:nofix": "eslint ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/JX3BOX/jx3-luadata.git"
+    },
+    "homepage": "https://github.com/JX3BOX/jx3-luadata.git",
+    "bugs": {
+        "url": "https://github.com/JX3BOX/jx3-luadata/issues"
+    }
 }
