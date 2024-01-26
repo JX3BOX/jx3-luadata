@@ -1,5 +1,5 @@
-import { crc32 } from "crc";
-import lzf from "lzfjs";
+import { crc32 } from 'crc';
+import lzf from 'lzfjs';
 
 export const KDATA_SIG_FLAG = 0x4b44;
 
@@ -37,12 +37,8 @@ export const isKData = (buffer: ArrayBuffer | Buffer) => {
  * @param options
  * @returns
  */
-export const writeKData = (
-    payload: ArrayBuffer,
-    options: KDataWriteOptions = {}
-) => {
-    const { hash = KDATA_HASH_FLAG.Crc32, compress = KDATA_COMPRESS_FLAG.Lzf } =
-        options;
+export const writeKData = (payload: ArrayBuffer, options: KDataWriteOptions = {}) => {
+    const { hash = KDATA_HASH_FLAG.Crc32, compress = KDATA_COMPRESS_FLAG.Lzf } = options;
 
     const originLength = payload.byteLength;
     if (options.compress === KDATA_COMPRESS_FLAG.Lzf) {
@@ -50,15 +46,17 @@ export const writeKData = (
     }
     const dataLength = payload.byteLength;
     const crc = hash === KDATA_HASH_FLAG.Crc32 ? crc32(payload) : 0;
-    const headerBuffer: Buffer = Buffer.allocUnsafe(16);
+    const result = new ArrayBuffer(16 + dataLength);
+    const dataView = new DataView(result);
 
-    headerBuffer.writeUInt8(hash, 0);
-    headerBuffer.writeUInt8(compress as number, 1);
-    headerBuffer.writeUint16LE(KDATA_SIG_FLAG, 2);
-    headerBuffer.writeUint32LE(crc, 4);
-    headerBuffer.writeUint32LE(originLength, 8);
-    headerBuffer.writeUint32LE(dataLength, 12);
-    const result = Buffer.concat([headerBuffer, Buffer.from(payload)]);
+    dataView.setUint8(0, hash);
+    dataView.setUint8(1, compress);
+    dataView.setUint16(2, KDATA_SIG_FLAG, true);
+    dataView.setUint32(4, crc, true);
+    dataView.setUint32(8, originLength, true);
+    dataView.setUint32(12, dataLength, true);
+
+    new Uint8Array(result).set(new Uint8Array(payload), 16);
     return result;
 };
 
@@ -68,20 +66,17 @@ export const writeKData = (
  * @param options
  * @returns
  */
-export const readKdata = (
-    buffer: ArrayBuffer | Buffer,
-    options: KDataReadOptions = {}
-) => {
+export const readKdata = (buffer: ArrayBuffer | Buffer, options: KDataReadOptions = {}) => {
     const { strict = false } = options;
     buffer = buffer instanceof ArrayBuffer ? buffer : buffer.buffer;
     const dataView = new DataView(buffer);
 
-    const hash = dataView.getUint8(0);
-    const compress = dataView.getUint8(1);
+    const hash = dataView.getUint8(0) as KDATA_HASH_FLAG;
+    const compress = dataView.getUint8(1) as KDATA_COMPRESS_FLAG;
     const sig = dataView.getUint16(2, true);
 
     if (sig !== KDATA_SIG_FLAG && strict) {
-        throw new KDataReadError("KData signature not match");
+        throw new KDataReadError('KData signature not match');
     }
 
     const crc = dataView.getUint32(4, true);
@@ -90,13 +85,10 @@ export const readKdata = (
     const _payload = buffer.slice(16, 16 + dataLength);
 
     if (hash === KDATA_HASH_FLAG.Crc32 && crc !== crc32(_payload) && strict) {
-        throw new KDataReadError("KData crc32 not match");
+        throw new KDataReadError('KData crc32 not match');
     }
 
-    const payload =
-        compress === KDATA_COMPRESS_FLAG.Lzf
-            ? lzf.decompress(_payload)
-            : _payload;
+    const payload = compress === KDATA_COMPRESS_FLAG.Lzf ? lzf.decompress(_payload) : _payload;
 
     return {
         hash,

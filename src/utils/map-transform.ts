@@ -22,23 +22,19 @@ const detectDuplicateKeys = (keys: any[]) => {
 };
 
 const detectDictType = (keys: any[]): DictType => {
-    if (
-        keys.some(key => !["number", "string"].includes(typeof key)) ||
-        detectDuplicateKeys(keys)
-    ) {
+    if (keys.some((key) => !['number', 'string'].includes(typeof key)) || detectDuplicateKeys(keys)) {
         return DictType.Map;
-    } else if (keys.some(key => typeof key === "number")) {
+    } else if (keys.some((key) => typeof key === 'number')) {
         return DictType.Array;
     } else {
         return DictType.Object;
     }
 };
 
-export const mapTransform = (
-    map: Map<any, any>,
-    options: MapTransformOptions = {}
-): Record<string, any> | any[] | Map<any, any> => {
-    if (!options.refs) options.refs = new Map();
+export const mapTransform = (map: Map<any, any>, options: MapTransformOptions = {}): Record<string, any> | any[] | Map<any, any> => {
+    if (!options.refs) {
+        options.refs = new Map();
+    }
     if (options.refs.has(map)) {
         return options.refs.get(map);
     }

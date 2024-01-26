@@ -1,9 +1,8 @@
-// import { readFile } from "fs/promises";
+// debug here
+import { writeBinary, writeKData } from '../dist/index.js';
+import fs from 'fs/promises';
 
-// const buffer = await readFile("./demo/不咕#2312@3.jx3dat");
-// const arrayBuffer = buffer.buffer;
-// const view = new DataView(arrayBuffer);
-// console.log(view.getUint16(2) == 0x444b);
-// console.log(view);
+const payload = writeBinary('test');
+const kdata = writeKData(payload, { compress: true });
 
-import { readJx3dat } from "../src/kdata";
+await fs.writeFile('test.jx3dat', Buffer.from(kdata));

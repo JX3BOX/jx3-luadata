@@ -1,2 +1,2 @@
-import { serializer } from "luadata";
+import { serializer } from 'luadata';
 export { serializer };

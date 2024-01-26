@@ -8,9 +8,26 @@
     "main": "dist/index.js",
     "devDependencies": {
         "@types/lodash": "^4.14.202",
-        "@types/node": "^20.11.6"
+        "@types/node": "^20.11.6",
+        "@rollup/plugin-json": "^6.1.0",
+        "@rollup/plugin-typescript": "11.1.5",
+        "@typescript-eslint/eslint-plugin": "6.13.2",
+        "@typescript-eslint/parser": "6.13.2",
+        "chai": "4.3.10",
+        "chai-as-promised": "7.1.1",
+        "eslint": "8.55.0",
+        "eslint-config-prettier": "9.1.0",
+        "eslint-plugin-prettier": "5.0.1",
+        "eslint-plugin-sort-imports-es6-autofix": "0.6.0",
+        "jest-mock": "29.7.0",
+        "mocha": "10.2.0",
+        "prettier": "3.1.0",
+        "rollup": "4.7.0",
+        "tslib": "2.6.2",
+        "typescript": "5.3.3"
     },
     "dependencies": {
+        "@types/emscripten": "^1.39.10",
         "chardet": "^2.0.0",
         "crc": "^4.3.2",
         "iconv-lite": "^0.6.3",
@@ -20,9 +37,12 @@
     },
     "license": "MIT",
     "scripts": {
-        "test": "mocha --parallel --require ./test/boot.js test/*.test.js",
+        "test": "mocha --parallel --require test/*.test.js",
         "lint": "prettier --write . && eslint . --fix --cache",
-        "lint:nofix": "eslint ."
+        "lint:nofix": "eslint .",
+        "start": "rollup -c -w",
+        "build": "rollup -c && tsc -d --emitDeclarationOnly --rootDir src --declarationDir dist",
+        "clean": "rm -rf dist"
     },
     "repository": {
         "type": "git",
