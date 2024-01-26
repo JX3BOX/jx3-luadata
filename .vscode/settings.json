@@ -1,10 +1,23 @@
 {
     "cSpell.words": [
         "chardet",
+        "DWORD",
+        "istable",
         "KDATA",
+        "KGLOG",
         "luadata",
+        "luatable",
         "lzfjs",
+        "memcpy",
         "nofix",
+        "Packup",
+        "strlen",
+        "struct",
+        "TBOOLEAN",
+        "TNIL",
+        "TNUMBER",
+        "TSTRING",
+        "TTABLE",
         "zvawq"
     ]
 }
