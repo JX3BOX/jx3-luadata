@@ -6,7 +6,7 @@ export const BINARY_SIG_FLAG = BigInt("0x206174614461754c");
 export const isBinary = (buffer: ArrayBuffer | Buffer) => {
     buffer = buffer instanceof ArrayBuffer ? buffer : buffer.buffer;
     const dataView = new DataView(buffer);
-    const sig = dataView.getBigUint64(2, true);
+    const sig = dataView.getBigUint64(0, true);
     return sig === BINARY_SIG_FLAG;
 };
 

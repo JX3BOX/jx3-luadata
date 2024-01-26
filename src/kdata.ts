@@ -12,10 +12,6 @@ export enum KDATA_COMPRESS_FLAG {
     Lzf = 0x46,
     Lzo = 0x4c,
 }
-export enum KDATA_ENCODING {
-    utf8 = "utf8",
-    gbk = "gbk",
-}
 
 declare interface KDataWriteOptions {
     hash?: KDATA_HASH_FLAG;
