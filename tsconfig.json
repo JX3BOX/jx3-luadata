@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "module": "esnext",
+        "baseUrl": ".",
+        "incremental": false,
+        "moduleResolution": "node",
+        "inlineSources": false,
+        "removeComments": true,
+        "sourceMap": false,
+        "target": "ES2018",
+        "skipLibCheck": true,
+        "lib": ["ESNEXT", "DOM"],
+        "importHelpers": true,
+        "strict": true,
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
+
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "typeRoots": ["node_modules/@types", "types"]
+    },
+    "include": ["src/**/*", "bench/**/*", "test/**/*"],
+    "exclude": ["node_modules"]
+}
