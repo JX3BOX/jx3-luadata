@@ -1,4 +1,5 @@
 import lodash from "lodash";
+import { DictType, mapTransform } from "./utils/map-transform";
 
 export const BINARY_SIG_FLAG = BigInt("0x206174614461754c");
 
@@ -19,34 +20,27 @@ declare type BinarySupportType =
     | Record<string, any>
     | Map<any, any>;
 
-declare enum DictType {
-    Array,
-    Object,
-    Map,
-}
-
-declare interface BinaryWriteOptions {
+export declare interface BinaryWriteOptions {
     sig: bigint;
     version: number;
     compress: boolean;
     hash: boolean;
 }
 
-declare interface BinaryPayloadWriteOptions {
+export declare interface BinaryPayloadWriteOptions {
     seen: Set<any>;
     buffer: ArrayBuffer;
     offset: number;
 }
 
-declare interface BinaryReadOptions {
-    sig: bigint;
-    strict: boolean;
-    dictType: DictType;
+export declare interface BinaryReadOptions {
+    sig?: bigint;
+    strict?: boolean;
+    dictType?: DictType;
 }
 
-declare interface BinaryPayloadReadOptions {
+export declare interface BinaryPayloadReadOptions {
     offset: number;
-    result: Map<any, any>
 }
 
 export enum BinaryLuaType {
@@ -57,7 +51,8 @@ export enum BinaryLuaType {
     Table,
 }
 
-const encoder = new TextEncoder();
+const stringEncoder = new TextEncoder();
+const stringDecoder = new TextDecoder();
 
 export const getTargetSize = (target: BinarySupportType, seen?: Set<any>) => {
     seen = seen || new Set();
@@ -70,7 +65,9 @@ export const getTargetSize = (target: BinarySupportType, seen?: Set<any>) => {
     } else if (typeof target === "boolean") {
         result += 1;
     } else if (typeof target === "string") {
-        result += encoder.encode(target).length + 1;
+        result += stringEncoder.encode(target).length + 1;
+    } else if (target === null || target === undefined) {
+        result += 0;
     } else if (
         lodash.isArray(target) ||
         lodash.isPlainObject(target) ||
@@ -94,6 +91,31 @@ export const getTargetSize = (target: BinarySupportType, seen?: Set<any>) => {
     return result;
 };
 
+export const writeBinary = (
+    target: BinarySupportType,
+    options?: BinaryWriteOptions
+) => {
+    const {
+        sig = BINARY_SIG_FLAG,
+        version = 2,
+        compress = false,
+        hash = false,
+    } = options || {};
+
+    const payload = new Uint8Array(writeBinaryPayload(target));
+
+    const result = new ArrayBuffer(18 + payload.byteLength);
+    const dataView = new DataView(result);
+    dataView.setBigUint64(0, sig);
+    dataView.setInt32(8, version);
+    dataView.setUint8(12, compress ? 1 : 0);
+    dataView.setUint8(13, hash ? 1 : 0);
+    dataView.setUint32(14, 0);
+    let offset = 18;
+    payload.forEach(byte => dataView.setUint8(offset++, byte));
+    return result;
+};
+
 export const writeBinaryPayload = (
     target: BinarySupportType,
     options?: BinaryPayloadWriteOptions
@@ -111,14 +133,14 @@ export const writeBinaryPayload = (
     const dataView = new DataView(options.buffer);
     if (typeof target === "number") {
         dataView.setUint8(options.offset++, BinaryLuaType.Number);
-        dataView.setFloat64(options.offset, target, true);
+        dataView.setFloat64(options.offset, target);
         options.offset += 8;
     } else if (typeof target === "boolean") {
         dataView.setUint8(options.offset++, BinaryLuaType.Boolean);
         dataView.setUint8(options.offset++, target ? 1 : 0);
     } else if (typeof target === "string") {
         dataView.setUint8(options.offset++, BinaryLuaType.String);
-        const encoded = encoder.encode(target);
+        const encoded = stringEncoder.encode(target);
         encoded.forEach(byte => dataView.setUint8(options.offset++, byte));
         dataView.setUint8(options.offset++, 0);
     } else if (target === null || target === undefined) {
@@ -154,47 +176,89 @@ export const writeBinaryPayload = (
     return options.buffer;
 };
 
-export const writeBinary = (
-    target: BinarySupportType,
-    options?: BinaryWriteOptions
-) => {
-    const {
-        sig = BINARY_SIG_FLAG,
-        version = 2,
-        compress = false,
-        hash = false,
-    } = options || {};
-
-    const payload = new Uint8Array(writeBinaryPayload(target));
-
-    const result = new ArrayBuffer(18 + payload.byteLength);
-    const dataView = new DataView(result);
-    dataView.setBigUint64(0, sig);
-    dataView.setInt32(8, version);
-    dataView.setUint8(12, compress ? 1 : 0);
-    dataView.setUint8(13, hash ? 1 : 0);
-    dataView.setUint32(14, 0);
-    let offset = 18;
-    payload.forEach(byte => dataView.setUint8(offset++, byte));
-    return result;
-};
-
 export const readBinary = (
     buffer: ArrayBuffer | Buffer,
-    options: BinaryReadOptions
+    options?: BinaryReadOptions
 ) => {
     if (buffer instanceof Buffer) buffer = buffer.buffer;
-    const { sig: expectSig = BINARY_SIG_FLAG, strict = false, dictType = DictType.Map } = options || {};
+    const {
+        sig: expectSig = BINARY_SIG_FLAG,
+        strict = false,
+        dictType = DictType.Map,
+    } = options || {};
 
     const dataView = new DataView(buffer);
+
     const sig = dataView.getBigUint64(0);
+    if (sig !== expectSig && strict) {
+        throw new Error("Signature not match", { cause: sig });
+    }
+
     const version = dataView.getInt32(8);
     const compress = dataView.getUint8(12);
     const hash = dataView.getUint8(13);
     const crc = dataView.getUint32(14);
 
-    const payload = buffer.slice(18);
-    
+    const payloadBuffer = buffer.slice(18);
+
+    let payload = readBinaryPayload(payloadBuffer);
+    if (payload instanceof Map) {
+        payload = mapTransform(payload, {
+            dictType,
+        }) as Map<any, any>;
+    }
+
+    return {
+        sig,
+        version,
+        compress,
+        hash,
+        crc,
+        payload,
+    };
 };
 
-export const readBinaryPayload = (buffer: ArrayBuffer | Buffer, options: BinaryPayloadReadOptions) => {
+export const readBinaryPayload = (
+    buffer: ArrayBuffer,
+    options?: BinaryPayloadReadOptions
+) => {
+    if (!options) {
+        options = {
+            offset: 0,
+        };
+    }
+
+    const dataView = new DataView(buffer);
+    while (options.offset < buffer.byteLength) {
+        const type = dataView.getUint8(options.offset++);
+        if (type === BinaryLuaType.Number) {
+            const result = dataView.getFloat64(options.offset);
+            options.offset += 8;
+            return result;
+        } else if (type === BinaryLuaType.Boolean) {
+            return dataView.getUint8(options.offset++) === 1;
+        } else if (type === BinaryLuaType.String) {
+            const start = options.offset;
+            while (dataView.getUint8(options.offset++) !== 0);
+            const result = stringDecoder.decode(
+                buffer.slice(start, options.offset - 1)
+            );
+            return result;
+        } else if (type === BinaryLuaType.Nil) {
+            return null;
+        } else if (type === BinaryLuaType.Table) {
+            const tableSize = dataView.getUint32(options.offset);
+            options.offset += 4;
+            const result = new Map();
+            const tableEnd = options.offset + tableSize;
+            while (options.offset < tableEnd) {
+                const key = readBinaryPayload(buffer, options);
+                const value = readBinaryPayload(buffer, options);
+                result.set(key, value);
+            }
+            return result;
+        }
+    }
+
+    throw new Error("Unexpected end of buffer");
+};

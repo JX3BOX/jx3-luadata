@@ -1,4 +1,4 @@
-export declare enum DictType {
+export enum DictType {
     Array,
     Object,
     Map,
