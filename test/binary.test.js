@@ -1,5 +1,5 @@
 const { Lua } = require('wasmoon-lua5.1');
-const { readBinary, writeBinary, luadata, DictType, mapTransform } = require('../dist/index.js');
+const { readBinary, writeBinary, DictType, mapTransform } = require('../dist/index.js');
 const { expect } = require('chai');
 const fs = require('fs');
 const iconv = require('iconv-lite');
