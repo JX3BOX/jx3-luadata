@@ -1,10 +1,18 @@
 const { Lua } = require('wasmoon-lua5.1');
-const { readBinary, writeBinary, DictType, mapTransform } = require('../dist/index.js');
+const { isBinary, readBinary, writeBinary, DictType, mapTransform } = require('../dist/index.js');
 const { expect } = require('chai');
 const fs = require('fs');
 const iconv = require('iconv-lite');
 
 describe('Binary', () => {
+    it('神说：我们应该能提供一个能判断buffer是不是binary格式的函数', () => {
+        const target = '那是一条神奇的天路！';
+
+        const buffer = writeBinary(target);
+        const result = isBinary(buffer);
+        expect(result).to.equal(true);
+    });
+
     it('神说：我们的库把一个表写入再写出应该是一致的', () => {
         const target = {
             a: 1,

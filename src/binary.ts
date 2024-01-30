@@ -11,7 +11,7 @@ export const isBinary = (buffer: ArrayBuffer | Buffer): boolean => {
     return sig === BINARY_SIG_FLAG;
 };
 
-declare type BinarySupportType = number | string | boolean | null | undefined | any[] | Record<string, any> | Map<any, any>;
+export declare type BinarySupportType = number | string | boolean | null | undefined | any[] | Record<string, any> | Map<any, any>;
 
 export declare interface BinaryWriteOptions {
     sig: bigint;

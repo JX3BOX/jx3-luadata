@@ -13,16 +13,16 @@ export enum KDATA_COMPRESS_FLAG {
     Lzo = 0x4c,
 }
 
-declare interface KDataWriteOptions {
+export declare interface KDataWriteOptions {
     hash?: KDATA_HASH_FLAG;
     compress?: KDATA_COMPRESS_FLAG;
 }
 
-declare interface KDataReadOptions {
+export declare interface KDataReadOptions {
     strict?: boolean;
 }
 
-class KDataReadError extends Error {}
+export class KDataReadError extends Error {}
 
 export const isKData = (buffer: ArrayBuffer | Buffer) => {
     buffer = buffer instanceof ArrayBuffer ? buffer : buffer.buffer;
