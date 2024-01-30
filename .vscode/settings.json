@@ -5,6 +5,7 @@
         "chardet",
         "DWORD",
         "emscripten",
+        "fstt",
         "istable",
         "KDATA",
         "KGLOG",
