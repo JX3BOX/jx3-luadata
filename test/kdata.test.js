@@ -1,4 +1,4 @@
-const { isKData, readKdata, writeKData } = require('../dist/index.js');
+const { isKData, readKData, writeKData } = require('../dist/index.js');
 const { expect } = require('chai');
 
 describe('Binary', () => {
@@ -18,7 +18,7 @@ describe('Binary', () => {
         const target = array.buffer;
 
         const buffer = writeKData(target, { compress: true, hash: true });
-        const result = readKdata(buffer);
+        const result = readKData(buffer);
         const payload = result.payload;
         expect(Buffer.from(payload).equals(Buffer.from(target))).to.equal(true);
     });

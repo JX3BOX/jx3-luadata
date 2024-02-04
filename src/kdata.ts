@@ -66,7 +66,7 @@ export const writeKData = (payload: ArrayBuffer, options: KDataWriteOptions = {}
  * @param options
  * @returns
  */
-export const readKdata = (buffer: ArrayBuffer | Buffer, options: KDataReadOptions = {}) => {
+export const readKData = (buffer: ArrayBuffer | Buffer, options: KDataReadOptions = {}) => {
     const { strict = false } = options;
     buffer = buffer instanceof ArrayBuffer ? buffer : buffer.buffer;
     const dataView = new DataView(buffer);
