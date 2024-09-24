@@ -22,7 +22,7 @@
         "jest-mock": "29.7.0",
         "mocha": "10.2.0",
         "prettier": "3.1.0",
-        "rollup": "4.7.0",
+        "rollup": "4.22.4",
         "tslib": "2.6.2",
         "typescript": "5.3.3"
     },
